@@ -1,0 +1,342 @@
+{
+  "name": "AI ATS Screeening System",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Engineering & Automation Graduate Recruitment Application Portal",
+        "formDescription": "Welcome! We are looking for sharp, computer-literate fresh graduates with a background in engineering to join our automation team. Fill out your details and upload your resume below to apply.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Name"
+            },
+            {
+              "fieldLabel": "Email"
+            },
+            {
+              "fieldLabel": "Field of Engineering"
+            },
+            {
+              "fieldLabel": "Upload Resume (PDF/DOCX)",
+              "fieldType": "file"
+            }
+          ]
+        },
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        -544,
+        16
+      ],
+      "id": "a932952d-26c4-4c1d-a16b-5f28e432c9f5",
+      "name": "On form submission",
+      "webhookId": "c1227327-f851-40f6-9de9-8838a00d2fa6"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "binaryPropertyName": "Upload_Resume__PDF_DOCX_",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        -304,
+        16
+      ],
+      "id": "c9b7c4a7-c4f8-4b67-878d-5d71fac3500d",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.text }}",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "You are an expert technical recruiter for an elite automation and engineering company. Your task is to screen applicant resumes against our specific job criteria:  Education: Must hold a fresh degree in Engineering or a closely related physical science/technical field.  Technical Literacy: Must demonstrate some computer literacy, tool familiarity, and a technical background.  Analyze the provided resume text and applicant details. Score the candidate from 1 to 100 based on their alignment with these requirements. Provide 3 core strengths, 2 potential skill gaps or areas for growth, and a final recommendation: 'Proceed to Interview' or 'Reject'.\nALWAYS output valid JSON with keys like: \"score\", \"strengths\", \"gaps\", and \"proceed to interview or rejected\"."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        -64,
+        16
+      ],
+      "id": "8c2de882-7310-4aba-8c1f-a915eafa1dc3",
+      "name": "Basic LLM Chain",
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "11eaBBkR-RE0fOEwyQb6KWATSsP32xHjgahedFA2wBQ4",
+          "mode": "list",
+          "cachedResultName": "Resume Tracker",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/11eaBBkR-RE0fOEwyQb6KWATSsP32xHjgahedFA2wBQ4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/11eaBBkR-RE0fOEwyQb6KWATSsP32xHjgahedFA2wBQ4/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Candidate Name": "={{ $('On form submission').item.json.Name }}",
+            "Email": "={{ $('On form submission').item.json.Email }}",
+            "Engineering Discipline": "={{ $('On form submission').item.json['Field of Engineering'] }}",
+            "AI Score": "={{ $json.score }}",
+            "Core Strength": "={{ $json.strengths[1] }}{{ $json.strengths[2] }}",
+            "Potential Gap": "={{ $json.gaps[1] }}",
+            "Proceed to Interview or Rejected": "={{ $json['proceed to interview or rejected'] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Candidate Name",
+              "displayName": "Candidate Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Engineering Discipline",
+              "displayName": "Engineering Discipline",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "AI Score",
+              "displayName": "AI Score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Core Strength",
+              "displayName": "Core Strength",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Potential Gap",
+              "displayName": "Potential Gap",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Proceed to Interview or Rejected",
+              "displayName": "Proceed to Interview or Rejected",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        544,
+        16
+      ],
+      "id": "18d07fbc-e650-40c5-947b-3af338c95934",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleApi": {
+          "id": "zmdfnzxVPIRCHcJQ",
+          "name": "Google Service Account account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-safeguard-20b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -144,
+        224
+      ],
+      "id": "fd6e3225-c925-4318-847c-350ed6c3ad36",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "6SalY5xRuZNnRBXY",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the raw text returned from the Basic LLM Chain node\nconst rawText = $input.item.json.text;\n\n// Clean up markdown code blocks if the AI included them\nlet cleanJsonString = rawText.replace(/```json/g, '').replace(/```/g, '').trim();\n\n// Parse it into a real JSON object\nconst parsedData = JSON.parse(cleanJsonString);\n\n// Return the parsed fields so they show up as individual properties\nreturn [{ json: parsedData }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        304,
+        16
+      ],
+      "id": "8e0b71b9-0bad-4e65-ab27-c3c1066a9722",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "fromEmail": "automationbot@odogwu.site",
+        "toEmail": "={{ $json.Email }}",
+        "subject": "=Application Update: {{ $('Code in JavaScript').item.json.recommendation }}",
+        "html": "=<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"utf-8\">\n  <style>\n    body { font-family: Arial, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; color: #333333; }\n    .email-container { max-width: 600px; background: #ffffff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }\n    .header { border-bottom: 2px solid #eaeaea; padding-bottom: 15px; margin-bottom: 20px; }\n    .header h2 { color: #0f172a; margin: 0; font-size: 22px; }\n    .company-tag { font-size: 13px; color: #3b82f6; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; display: block; }\n    .badge-success { background: #dcfce7; color: #166534; padding: 6px 12px; border-radius: 20px; font-weight: bold; font-size: 14px; display: inline-block; }\n    .badge-reject { background: #fee2e2; color: #991b1b; padding: 6px 12px; border-radius: 20px; font-weight: bold; font-size: 14px; display: inline-block; }\n    .score-box { background: #f8fafc; border-left: 4px solid #3b82f6; padding: 15px; margin: 20px 0; border-radius: 4px; }\n    .cta-button { display: inline-block; background: #0a66c2; color: #ffffff !important; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; margin-top: 20px; }\n    .footer { margin-top: 30px; font-size: 12px; color: #888888; border-top: 1px solid #eaeaea; padding-top: 15px; text-align: center; }\n  </style>\n</head>\n<body>\n  <div class=\"email-container\">\n    <div class=\"header\">\n      <span class=\"company-tag\">Engineering & Automation Graduate Recruitment</span>\n      <h2>Application Status Update</h2>\n    </div>\n    \n    <p>Hello,</p>\n    <p>Thank you for submitting your application to the <strong>Engineering & Automation Graduate Recruitment Portal</strong>. Your resume has been successfully processed and reviewed by our automated screening system.</p>\n    \n    <div class=\"score-box\">\n      <p style=\"margin: 0 0 10px 0;\"><strong>Evaluation Score:</strong> {{ $('Code in JavaScript').item.json.score }} / 100</p>\n      <p style=\"margin: 0;\"><strong>Status:</strong> \n        {{ Number($('Code in JavaScript').item.json.score) >= 50 ? '<span class=\"badge-success\">Proceed to Interview</span>' : '<span class=\"badge-reject\">Rejected</span>' }}\n      </p>\n    </div>\n\n    <!-- CONDITIONAL CONTENT BASED ON SCORE >= 50 -->\n    {{ \n      Number($('Code in JavaScript').item.json.score) >= 50 \n      ? `\n        <p><strong>Core Strengths Identified:</strong></p>\n        <ul>\n          <li>${$('Code in JavaScript').item.json.strengths[0] || 'Strong technical foundation'}</li>\n          <li>${$('Code in JavaScript').item.json.strengths[1] || 'Good alignment with requirements'}</li>\n        </ul>\n        <p>Since your profile meets our technical benchmark (50+), we would love to connect with you for the next steps of the interview process.</p>\n        <a href=\"www.linkedin.com/in/clinton-agummadu-602389288\" target=\"_blank\" class=\"cta-button\">Connect on LinkedIn / Schedule Next Steps</a>\n      ` \n      : `\n        <p>Thank you for your interest in the position. After careful review of your qualifications against our current requirements, we regret to inform you that we will not be moving forward with your application at this time.</p>\n        <p>We wish you the absolute best in your career pursuits and professional growth.</p>\n      ` \n    }}\n\n    <div class=\"footer\">\n      <p>Powered By Odogwu Automation Studio; This is an automated notification.</p>\n    </div>\n  </div>\n</body>\n</html>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        768,
+        16
+      ],
+      "id": "092b65cc-b48b-42ef-8dc7-40569a43b8f2",
+      "name": "Send an Email",
+      "webhookId": "1215608b-41f2-4af4-90cd-9a0cc9882aad",
+      "credentials": {
+        "smtp": {
+          "id": "BPNZ6tAC7Ou88gaQ",
+          "name": "SMTP account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Send an Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "9ba7766f-090c-4a7a-bb88-3e8243c2912b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "13ff3582439a99c8dc80561afe729fccd8e5ecb467e032acc521d2dc3b6fc2df"
+  },
+  "nodeGroups": [],
+  "id": "rOnz6t6PkbovAib1",
+  "tags": []
+}
